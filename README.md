@@ -39,13 +39,34 @@ proj/
 
 ## Status
 
-- [ ] Check WHOOP developer platform API access requirements
-- [ ] OAuth setup + data pull
-- [ ] Cleaning + feature engineering
+- [x] Check WHOOP developer platform API access requirements
+- [x] OAuth setup + data pull (`src/whoop_client.py`, `src/pull_data.py` — 9 months, auto-paginated)
+- [x] Cleaning + feature engineering (`src/clean.py` → `data/daily.csv`, one row/day)
 - [ ] Lag correlation / regression analysis
 - [ ] Plots
 - [ ] Findings write-up
 
-## Findings
+## Future analysis idea: does evening-hard-exercise timing raise resting HR, controlling for daytime load?
 
-_(TBD)_
+Don't just regress `sleep_proximity_zone45_load` (evening zone4/5 minutes weighted by
+closeness to that night's sleep onset — see `src/clean.py`) against
+`resting_heart_rate` directly. Evening hard-effort days are probably correlated
+with generally hard-effort days (more zone1-3 earlier too), so a naive fit
+would partly just be re-detecting "high-strain days raise RHR," not "timing
+specifically matters."
+
+Fix: hold total daytime load roughly constant before comparing evening timing.
+Two ways to do this when the time comes:
+
+1. **Matching** — bucket days by daytime load (`zone1_3_minutes` and/or
+   `day_strain` minus the evening portion), then only compare evening-heavy
+   vs evening-light days *within* the same daytime-load bucket.
+2. **Multiple regression with daytime load as a covariate** — regress
+   `resting_heart_rate ~ sleep_proximity_zone45_load + daytime_zone1_3_minutes + day_strain`
+   (or similar) so the model estimates the marginal effect of evening timing
+   *after* accounting for how hard the day already was. This is the more
+   standard approach and scales better as more control variables come up
+   (alcohol, illness, stress are unmeasured but at least daytime load isn't).
+
+Worth revisiting once there's a notebook and enough evening-hard-workout days
+accumulated (~23 out of 270 days as of 2026-09-15) to have any power for this.
