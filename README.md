@@ -42,10 +42,11 @@ proj/
 
 ### Notebooks
 
-- **`01_sleep_vs_hrv_rhr.ipynb`** — initial exploratory pass: basic sleep
-  variables (total sleep hours, sleep consistency, sleep efficiency, deep
-  sleep hours) plus 1-5 day trailing sleep averages, each checked against
-  HRV and resting heart rate as outputs.
+- **`01_sleep_vs_hrv_rhr.ipynb`** — initial exploratory pass, kept at the
+  "what would you intuitively check first" level: total/deep/REM/restorative
+  (deep+REM) sleep hours, sleep consistency, sleep efficiency — each
+  same-night, plus just a 1-2 day trailing average — checked against HRV and
+  resting heart rate as outputs. Longer lookbacks live in notebook 02.
 - **`02_sleep_vs_hrv_rhr_full_pairwise.ipynb`** — more granular follow-up:
   isolated single nights (not averaged with anything) and skip-day pairwise
   combinations (e.g. the average of night 2 + night 4, skipping night 3),
