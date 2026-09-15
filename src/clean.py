@@ -23,7 +23,6 @@ OUT_PATH = PROJECT_ROOT / "data" / "daily.csv"
 
 MILLI_PER_HOUR = 3_600_000
 KJ_PER_KCAL = 4.184
-EVENING_HOUR_CUTOFF = 18  # 6pm local time
 
 
 def local_datetime(iso_ts: str, tz_offset: str) -> datetime:
@@ -109,8 +108,6 @@ def build_workout_daily_table(workouts: list) -> pd.DataFrame:
         score = w.get("score") or {}
         zones = score.get("zone_durations") or {}
         start_local = local_datetime(w["start"], w["timezone_offset"])
-        zone4_5 = ((zones.get("zone_four_milli") or 0) + (zones.get("zone_five_milli") or 0)) / 60000
-        is_evening = start_local.hour >= EVENING_HOUR_CUTOFF
         rows.append(
             {
                 "date": start_local.date().isoformat(),
@@ -122,18 +119,12 @@ def build_workout_daily_table(workouts: list) -> pd.DataFrame:
                     + (zones.get("zone_three_milli") or 0)
                 )
                 / 60000,
-                "zone4_5_minutes": zone4_5,
-                "evening_zone4_5_minutes": zone4_5 if is_evening else 0.0,
-                "had_evening_hard_workout": is_evening and zone4_5 > 0,
+                "zone4_5_minutes": ((zones.get("zone_four_milli") or 0) + (zones.get("zone_five_milli") or 0)) / 60000,
             }
         )
     if not rows:
         return pd.DataFrame(
-            columns=[
-                "date", "num_workouts", "sports", "distance_meter_total",
-                "zone1_3_minutes", "zone4_5_minutes",
-                "evening_zone4_5_minutes", "had_evening_hard_workout",
-            ]
+            columns=["date", "num_workouts", "sports", "distance_meter_total", "zone1_3_minutes", "zone4_5_minutes"]
         )
     df = pd.DataFrame(rows)
     agg = df.groupby("date").agg(
@@ -142,8 +133,6 @@ def build_workout_daily_table(workouts: list) -> pd.DataFrame:
         distance_meter_total=("distance_meter", "sum"),
         zone1_3_minutes=("zone1_3_minutes", "sum"),
         zone4_5_minutes=("zone4_5_minutes", "sum"),
-        evening_zone4_5_minutes=("evening_zone4_5_minutes", "sum"),
-        had_evening_hard_workout=("had_evening_hard_workout", "any"),
     )
     return agg.reset_index()
 
@@ -164,9 +153,8 @@ def main():
     daily = daily.drop(columns=["day_kilojoule"])
 
     daily["num_workouts"] = daily["num_workouts"].fillna(0).astype(int)
-    for col in ["distance_meter_total", "zone1_3_minutes", "zone4_5_minutes", "evening_zone4_5_minutes"]:
+    for col in ["distance_meter_total", "zone1_3_minutes", "zone4_5_minutes"]:
         daily[col] = daily[col].fillna(0.0)
-    daily["had_evening_hard_workout"] = daily["had_evening_hard_workout"].fillna(False)
 
     # Drop days with no recovery/sleep at all - either a boundary artifact from the
     # pull's start-date cutoff, or a night WHOOP wasn't worn. Not usable either way.
