@@ -1,5 +1,3 @@
-output/*
-!output/.gitkeep
 *.sqlite
 .env
 token.json
