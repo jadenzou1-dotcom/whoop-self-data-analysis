@@ -1,14 +1,17 @@
-# WHOOP Sleep/HRV/Recovery Analysis
+# WHOOP Self-Data Analysis
 
-Personal-data project analyzing whether sleep patterns predict next-day/next-week
-recovery metrics (HRV, recovery score) using real WHOOP data — not just charts,
-but actual lag-correlation / regression analysis.
+Personal-data project analyzing my own WHOOP data — sleep, HRV, recovery, and
+later strain/activity — to find real trends, not just charts. Actual
+lag-correlation / regression analysis, not eyeballing two lines on a graph.
 
 ## Goal
 
-Test claims like "sleep debt this week → lower HRV next week" statistically,
-rather than eyeballing two lines on a graph. A credible null result ("no
-meaningful lag effect, but strong same-day correlation") is a fine outcome.
+Look for trends in my own data: what actions I take actually move which body
+metrics, and by how much. Examples of the kind of claim this should be able
+to test: "sleep debt this week → lower HRV next week," or "evening activity →
+higher resting heart rate that same night." A credible null result ("no
+meaningful lag effect, but strong same-day correlation") is a fine outcome
+too.
 
 ## Plan
 
@@ -36,6 +39,25 @@ proj/
   src/         data pull, cleaning, feature engineering, analysis scripts
   output/      generated plots, figures
 ```
+
+### Notebooks
+
+- **`01_sleep_vs_hrv_rhr.ipynb`** — initial exploratory pass: basic sleep
+  variables (total sleep hours, sleep consistency, sleep efficiency, deep
+  sleep hours) plus 1-5 day trailing sleep averages, each checked against
+  HRV and resting heart rate as outputs.
+- **`02_sleep_vs_hrv_rhr_full_pairwise.ipynb`** — more granular follow-up:
+  isolated single nights (not averaged with anything) and skip-day pairwise
+  combinations (e.g. the average of night 2 + night 4, skipping night 3),
+  extended to a 7-day lookback, for both total sleep and deep sleep
+  specifically. These are much more unique/specific inputs, so a real
+  correlation is less likely — but worth checking anyway, since it'd be an
+  interesting result if one turned up. Partly inspired by marathon-runner
+  folklore that the night *before* a race matters less than the night before
+  that one — if some particular combination of nights matters more than a
+  simple cumulative average, this is where it would show up.
+- **Notebook 3 onward (future)** — bring in strain, activity/workout data,
+  and other WHOOP metrics beyond sleep.
 
 ## Status
 
